@@ -1,4 +1,4 @@
-MPD-notify notices you on MPD's state. It will show a notification on song change and on play/pause/stop. 
+MPD-notify notifies you on MPD's state. It will show a notification on song change and on play/pause/stop. 
 
 To be able to use this, you will need to have the following dependencies:
  1. libnotify
