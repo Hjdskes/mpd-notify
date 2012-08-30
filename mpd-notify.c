@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define NOTIFICATION_TIMEOUT	10000
+/*#define NOTIFICATION_TIMEOUT	10000*/
 
 #define TEXT_PLAY	"<b>%s</b>\n- <i>%s</i>"
 #define TEXT_PAUSE  "Paused playback"
@@ -93,7 +93,7 @@ struct mpd_status* theStatus = mpd_recv_status(conn);
 
 		notify_notification_update(netlink, "MPD:", notification, "sound");
 
-		notify_notification_set_timeout(netlink, NOTIFICATION_TIMEOUT);
+		/*notify_notification_set_timeout(netlink, NOTIFICATION_TIMEOUT);*/
 		notify_notification_set_category(netlink, "MPD-Notification");
 		notify_notification_set_urgency (netlink, NOTIFY_URGENCY_NORMAL);
 
