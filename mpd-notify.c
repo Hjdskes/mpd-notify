@@ -1,7 +1,7 @@
 /* MPD-NOTIFY
  *
  * (C) 2011-2012 by Christian Hesse <mail@eworm.de>
- * (C) 2012		 by Jente Hidskes <jthidskes@outlook.com>
+ * (C) 2012-2013 by Jente Hidskes <jthidskes@outlook.com>
  *
  * This software may be used and distributed according to the terms
  * of the GNU General Public License, incorporated herein by reference.
