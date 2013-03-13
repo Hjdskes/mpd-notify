@@ -20,7 +20,7 @@
 #define TEXT_PLAY	    "<b>%s</b>\n- <i>%s</i>"
 #define TEXT_PAUSE	    "Paused playback"
 #define TEXT_STOP	    "Stopped playback"
-#define TEXT_UNKNOWN	"(unknown)"
+#define TEXT_UNKNOWN    "(unknown)"
 
 int main(int argc, char **argv) {
 	struct mpd_connection *conn = mpd_connection_new(NULL, 0, 30000);

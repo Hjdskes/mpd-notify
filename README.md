@@ -7,6 +7,11 @@ To be able to use this, you will need to have the following dependencies install
 * libnotify
 * libmpdclient
 
+To build and install, just run the following commands:
+
+	$ make
+	# make clean install
+
 I have forked the original project by Christian Hesse (mail@eworm.de) and as such, all credit should still be given to him. 
 I asked for his permission to upload this and it has been granted.
 
