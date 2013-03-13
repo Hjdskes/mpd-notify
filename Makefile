@@ -8,7 +8,7 @@ install:
 	install -Dm755 ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
 
 uninstall:
-	rm ${DESTDIR}${PREFIX}/bin/${PROG}
+	rm -f ${DESTDIR}${PREFIX}/bin/${PROG}
 
 clean:
-	rm mpd-notify
+	rm -f mpd-notify

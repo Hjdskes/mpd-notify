@@ -7,33 +7,31 @@
  * of the GNU General Public License, incorporated herein by reference.
  *
  * Modified by Jente, to show different text and also added pause message.
- * Done so with great help by the Arch Linux community - couldn't have done
- * it without their help. All credit should still go to the original author.
+ * All credit should still go to the original author.
  */
 
 #include <mpd/client.h>
 #include <libnotify/notify.h>
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define TEXT_PLAY	"<b>%s</b>\n- <i>%s</i>"
-#define TEXT_PAUSE	"Paused playback"
-#define TEXT_STOP	"Stopped playback"
+#define TEXT_PLAY	    "<b>%s</b>\n- <i>%s</i>"
+#define TEXT_PAUSE	    "Paused playback"
+#define TEXT_STOP	    "Stopped playback"
 #define TEXT_UNKNOWN	"(unknown)"
 
-int main(int argc, char ** argv) {
-	struct mpd_connection * conn = mpd_connection_new(NULL, 0, 30000);
-	struct mpd_song * song = NULL;
-	char * title = NULL;
-	char * artist = NULL;
-	char * album = NULL;
-	char * notification = NULL;
+int main(int argc, char **argv) {
+	struct mpd_connection *conn = mpd_connection_new(NULL, 0, 30000);
+	struct mpd_song *song = NULL;
+	char *title = NULL;
+	char *artist = NULL;
+	char *album = NULL;
+	char *notification = NULL;
 	int errcount = 0;
-	NotifyNotification * netlink = NULL;
-	GError * error = NULL;
+	NotifyNotification *netlink = NULL;
+	GError *error = NULL;
 
 	printf("%s: %s v%s (compiled: %s)\n", argv[0], PROGNAME, VERSION, DATE);
 
@@ -56,10 +54,10 @@ int main(int argc, char ** argv) {
 		mpd_send_current_song(conn);
 		mpd_command_list_end(conn);
 
-		struct mpd_status* theStatus = mpd_recv_status(conn);
-		if ( ! theStatus)
+		struct mpd_status *theStatus = mpd_recv_status(conn);
+		if (!theStatus)
 			fprintf(stderr,"%s: Can't connect to MPD. Exiting.");
-		else
+		else {
 			if (mpd_status_get_state(theStatus) == MPD_STATE_PLAY) {
 				mpd_response_next(conn);
 
@@ -82,6 +80,7 @@ int main(int argc, char ** argv) {
 				notification = (char *) malloc(strlen(TEXT_STOP));
 				sprintf(notification, TEXT_STOP);
 			}
+		}
 
 		printf("%s: %s\n", argv[0], notification);
 
@@ -98,7 +97,6 @@ int main(int argc, char ** argv) {
 				errcount++;
 
 				g_error_free(error);
-				error = NULL;
 				notify_uninit();
 				usleep(500 * 1000);
 
