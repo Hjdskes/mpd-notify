@@ -1,4 +1,4 @@
-/* MPD-NOTIFY
+/* mpd-notify.c
  *
  * (C) 2011-2012 by Christian Hesse <mail@eworm.de>
  * (C) 2012-2013 by Jente Hidskes <jthidskes@outlook.com>
@@ -23,18 +23,17 @@
 #define TEXT_UNKNOWN    "(unknown)"
 
 int main(int argc, char **argv) {
-	struct mpd_connection *conn = mpd_connection_new(NULL, 0, 30000);
 	struct mpd_song *song = NULL;
-	char *title = NULL;
-	char *artist = NULL;
-	char *album = NULL;
-	char *notification = NULL;
+	struct mpd_connection *conn;
+	struct mpd_status *status;
+	char *title = NULL, *artist = NULL, *album = NULL, *notification = NULL;
 	int errcount = 0;
 	NotifyNotification *netlink = NULL;
 	GError *error = NULL;
 
 	printf("%s: %s v%s (compiled: %s)\n", argv[0], PROGNAME, VERSION, DATE);
 
+	conn = mpd_connection_new(NULL, 0, 30000);
 	if (mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
 		fprintf(stderr,"%s: %s\n", argv[0], mpd_connection_get_error_message(conn));
 		mpd_connection_free(conn);
@@ -54,29 +53,24 @@ int main(int argc, char **argv) {
 		mpd_send_current_song(conn);
 		mpd_command_list_end(conn);
 
-		struct mpd_status *theStatus = mpd_recv_status(conn);
-		if (!theStatus)
+		status = mpd_recv_status(conn);
+		if (!status)
 			fprintf(stderr,"%s: Can't connect to MPD. Exiting.");
 		else {
-			if (mpd_status_get_state(theStatus) == MPD_STATE_PLAY) {
+			if (mpd_status_get_state(status) == MPD_STATE_PLAY) {
 				mpd_response_next(conn);
-
 				song = mpd_recv_song(conn);
-
 				if ((title = g_markup_escape_text(mpd_song_get_tag(song, MPD_TAG_TITLE, 0), -1)) == NULL)
 					title = TEXT_UNKNOWN;
 				if ((artist = g_markup_escape_text(mpd_song_get_tag(song, MPD_TAG_ARTIST, 0), -1)) == NULL)
 					artist = TEXT_UNKNOWN;
-
 				notification = (char *) malloc(strlen(TEXT_PLAY) + strlen(title) + strlen(artist));
 				sprintf(notification, TEXT_PLAY, title, artist);
 				mpd_song_free(song);
-			}
-			else if (mpd_status_get_state(theStatus) == MPD_STATE_PAUSE) {
+			} else if (mpd_status_get_state(status) == MPD_STATE_PAUSE) {
 				notification = (char *) malloc(strlen(TEXT_PAUSE));
 				sprintf(notification, TEXT_PAUSE);
-			}
-			else {
+			} else {
 				notification = (char *) malloc(strlen(TEXT_STOP));
 				sprintf(notification, TEXT_STOP);
 			}
