@@ -10,7 +10,7 @@ license=('GPL')
 _gitroot="https://github.com/Unia/mpd-notify.git"
 _gitname="${pkgname}"
 
-build() {
+package() {
   cd ${srcdir}/
     msg "Connecting to GIT server...."
     
@@ -25,5 +25,10 @@ build() {
   cd ${srcdir}/${pkgname}
 
   make
+}
+
+build() {
+  cd ${srcdir}/${pkgname}
+
   make DESTDIR="${pkgdir}" install
 }
