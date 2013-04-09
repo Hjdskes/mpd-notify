@@ -11,30 +11,30 @@ license=('GPL')
 _gitroot="https://github.com/Unia/mpd-notify.git"
 _gitname="${pkgbase}"
 
-package() {
-  cd ${srcdir}/
-    msg "Connecting to GIT server...."
+build() {
+	cd ${srcdir}/
+ 	msg "Connecting to GIT server...."
     
-    if [ -d ${_gitname} ] ; then
-        cd ${_gitname} && git pull origin
-        msg "The local files are updated."
-    else
-        git clone ${_gitroot} ${_gitname}
-    fi
-    msg "GIT checkout done or server timeout"
+	if [ -d ${_gitname} ] ; then
+		cd ${_gitname} && git pull origin
+		msg "The local files are updated."
+	else
+		git clone ${_gitroot} ${_gitname}
+	fi
+	msg "GIT checkout done or server timeout"
 
-  cd ${srcdir}/${pkgbase}
+	cd ${srcdir}/${pkgbase}
 
-  make
+	make
 }
 
 pkgver() {
-    cd "$srcdir/$_gitname"
-    git log -1 --format="%cd" --date=short | sed 's\-\.\g'
+	cd "$srcdir/$_gitname"
+	git log -1 --format="%cd" --date=short | sed 's\-\.\g'
 }
 
-build() {
-  cd ${srcdir}/${pkgbase}
+package() {
+	cd ${srcdir}/${pkgbase}
 
-  make DESTDIR="${pkgdir}" install
+	make DESTDIR="${pkgdir}" install
 }
