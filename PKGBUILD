@@ -1,4 +1,5 @@
-pkgname=mpd-notify
+pkgname=mpd-notify-git
+pkgbase=mpd-notify
 pkgver=20120921
 pkgrel=1
 pkgdesc="Notifies you about MPD"
@@ -8,7 +9,12 @@ depends=('libnotify' 'libmpdclient')
 license=('GPL')
 
 _gitroot="https://github.com/Unia/mpd-notify.git"
-_gitname="${pkgname}"
+_gitname="${pkgbase}"
+
+pkgver() {
+    cd "$srcdir/$_gitname"
+    git log -1 --format="%cd" --date=short | sed 's|-|.|g'
+}
 
 package() {
   cd ${srcdir}/
@@ -22,13 +28,13 @@ package() {
     fi
     msg "GIT checkout done or server timeout"
 
-  cd ${srcdir}/${pkgname}
+  cd ${srcdir}/${pkgbase}
 
   make
 }
 
 build() {
-  cd ${srcdir}/${pkgname}
+  cd ${srcdir}/${pkgbase}
 
   make DESTDIR="${pkgdir}" install
 }
