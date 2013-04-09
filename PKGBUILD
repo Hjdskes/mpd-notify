@@ -1,6 +1,6 @@
 pkgname=mpd-notify-git
 pkgbase=mpd-notify
-pkgver=20120921
+pkgver=2013.03.28
 pkgrel=1
 pkgdesc="Notifies you about MPD"
 arch=('i686' 'x86_64')
@@ -10,11 +10,6 @@ license=('GPL')
 
 _gitroot="https://github.com/Unia/mpd-notify.git"
 _gitname="${pkgbase}"
-
-pkgver() {
-    cd "$srcdir/$_gitname"
-    git log -1 --format="%cd" --date=short | sed 's|-|.|g'
-}
 
 package() {
   cd ${srcdir}/
@@ -31,6 +26,11 @@ package() {
   cd ${srcdir}/${pkgbase}
 
   make
+}
+
+pkgver() {
+    cd "$srcdir/$_gitname"
+    git log -1 --format="%cd" --date=short | sed 's\-\.\g'
 }
 
 build() {
