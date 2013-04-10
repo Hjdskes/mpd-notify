@@ -1,40 +1,29 @@
+# Maintainer: Unia <jthidskes@outlook.com> 
+
 pkgname=mpd-notify-git
-pkgbase=mpd-notify
-pkgver=2013.03.28
+_gitname=mpd-notify
+pkgver=2013.04.10
 pkgrel=1
-pkgdesc="Notifies you about MPD"
+pkgdesc="Notifies you about MPD song changes"
 arch=('i686' 'x86_64')
 url="https://github.com/Unia/mpd-notify"
-depends=('libnotify' 'libmpdclient')
 license=('GPL')
-
-_gitroot="https://github.com/Unia/mpd-notify.git"
-_gitname="${pkgbase}"
-
-build() {
-	cd ${srcdir}/
- 	msg "Connecting to GIT server...."
-    
-	if [ -d ${_gitname} ] ; then
-		cd ${_gitname} && git pull origin
-		msg "The local files are updated."
-	else
-		git clone ${_gitroot} ${_gitname}
-	fi
-	msg "GIT checkout done or server timeout"
-
-	cd ${srcdir}/${pkgbase}
-
-	make
-}
+depends=('libnotify' 'libmpdclient')
+makedepends=('git')
+source=('git://github.com/Unia/mpd-notify.git')
+md5sums=('SKIP')
 
 pkgver() {
-	cd "$srcdir/$_gitname"
-	git log -1 --format="%cd" --date=short | sed 's\-\.\g'
+  cd $_gitname
+  git log -1 --format="%cd" --date=short | sed 's|-|.|g'
+}
+
+build() {
+  cd $_gitname
+  make
 }
 
 package() {
-	cd ${srcdir}/${pkgbase}
-
-	make DESTDIR="${pkgdir}" install
+  cd $_gitname
+  make PREFIX=/usr DESTDIR="$pkgdir" install
 }
