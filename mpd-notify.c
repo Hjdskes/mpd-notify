@@ -67,6 +67,9 @@ int main(int argc, char **argv) {
 				notification = (char *) malloc(strlen(TEXT_PLAY) + strlen(title) + strlen(artist));
 				sprintf(notification, TEXT_PLAY, title, artist);
 				mpd_song_free(song);
+				free(title);
+				free(artist);
+				free(album);
 			} else if (mpd_status_get_state(status) == MPD_STATE_PAUSE) {
 				notification = (char *) malloc(strlen(TEXT_PAUSE));
 				sprintf(notification, TEXT_PAUSE);
