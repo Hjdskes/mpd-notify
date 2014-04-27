@@ -1,92 +1,121 @@
-/* mpd-notify.c
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
+/*
+ * mpd-notify.c
+ * Copyright (C) 2011-2012 Christian Hesse <mail@eworm.de>
+ * Copyright (C) 2013-2014 Jente Hidskes <hjdskes@gmail.com>
  *
- * (C) 2011-2012 by Christian Hesse <mail@eworm.de>
- * (C) 2012-2013 by Jente Hidskes <jthidskes@outlook.com>
+ * MPD Notify is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * This software may be used and distributed according to the terms
- * of the GNU General Public License, incorporated herein by reference.
+ * MPD Notify is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
  *
- * Modified by Jente, to show different text and also added pause message.
- * All credit should still go to the original author.
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <mpd/client.h>
-#include <libnotify/notify.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mpd/client.h>
+#include <libnotify/notify.h>
 
-#define TEXT_PLAY       "<b>%s</b>\n- <i>%s</i>"
+#define TEXT_PLAY       "<b>%s</b>\n - <i>%s</i>"
 #define TEXT_PAUSE      "Paused playback"
 #define TEXT_STOP       "Stopped playback"
 #define TEXT_UNKNOWN    "(unknown)"
 
-int main(int argc, char **argv) {
-	struct mpd_song *song = NULL;
-	struct mpd_connection *conn;
-	struct mpd_status *status;
-	char *title = NULL, *artist = NULL, *album = NULL, *notification = NULL;
-	int errcount = 0;
+int
+main(int argc, char **argv) {
 	NotifyNotification *netlink = NULL;
+	struct mpd_connection *conn = NULL;
+	struct mpd_status *status = NULL;
+	struct mpd_song *song = NULL;
+	const char *temp;
+	char *notification, *title, *artist;
+	int errcount, status_type, size;
 	GError *error = NULL;
 
-	printf("%s: %s v%s (compiled: %s)\n", argv[0], PROGNAME, VERSION, DATE);
+	fprintf(stdout, "%s: %s v%s (compiled: %s)\n", argv[0], PROGNAME, VERSION, DATE);
 
 	conn = mpd_connection_new(NULL, 0, 30000);
-	if (mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
-		fprintf(stderr,"%s: %s\n", argv[0], mpd_connection_get_error_message(conn));
+	if(mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
+		const char *err = mpd_connection_get_error_message(conn);
+		fprintf(stderr,"%s: %s\n", argv[0], err);
 		mpd_connection_free(conn);
 		exit(EXIT_FAILURE);
 	}
 
-	if(!notify_init("Udev-Net-Notification")) {
+	if(notify_init("MPD Notify") == FALSE) {
 		fprintf(stderr, "%s: Can't create notify.\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	netlink = notify_notification_new("MPD Notification", NULL, "sound");
+	netlink = notify_notification_new("MPD Notify", NULL, "sound");
 
-	while(mpd_run_idle_mask(conn, MPD_IDLE_PLAYER)) {
+	while(mpd_run_idle_mask(conn, MPD_IDLE_PLAYER) != 0) {
 		mpd_command_list_begin(conn, true);
 		mpd_send_status(conn);
 		mpd_send_current_song(conn);
 		mpd_command_list_end(conn);
 
 		status = mpd_recv_status(conn);
-		if (!status)
-			fprintf(stderr,"%s: Can't connect to MPD. Exiting.");
-		else {
-			if (mpd_status_get_state(status) == MPD_STATE_PLAY) {
-				mpd_response_next(conn);
-				song = mpd_recv_song(conn);
-				if ((title = g_markup_escape_text(mpd_song_get_tag(song, MPD_TAG_TITLE, 0), -1)) == NULL)
-					title = TEXT_UNKNOWN;
-				if ((artist = g_markup_escape_text(mpd_song_get_tag(song, MPD_TAG_ARTIST, 0), -1)) == NULL)
-					artist = TEXT_UNKNOWN;
-				notification = (char *) malloc(strlen(TEXT_PLAY) + strlen(title) + strlen(artist));
-				sprintf(notification, TEXT_PLAY, title, artist);
-				mpd_song_free(song);
-				free(title);
-				free(artist);
-				free(album);
-			} else if (mpd_status_get_state(status) == MPD_STATE_PAUSE) {
-				notification = (char *) malloc(strlen(TEXT_PAUSE));
-				sprintf(notification, TEXT_PAUSE);
-			} else {
-				notification = (char *) malloc(strlen(TEXT_STOP));
-				sprintf(notification, TEXT_STOP);
+		if(status == FALSE) {
+			fprintf(stderr, "%s: Can't connect to MPD. Exiting.\n", argv[0]);
+			mpd_connection_free(conn);
+			exit(EXIT_FAILURE);
+		} else {
+			status_type = mpd_status_get_state(status);
+			switch(status_type) {
+				case(MPD_STATE_PLAY):
+					mpd_response_next(conn);
+					song = mpd_recv_song(conn);
+					temp = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
+					title = g_markup_escape_text(temp, -1);
+					temp = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
+					artist = g_markup_escape_text(temp, -1);
+					if(title == NULL)
+						title = TEXT_UNKNOWN;
+					if(artist == NULL)
+						artist = TEXT_UNKNOWN;
+					size = strlen(TEXT_PLAY) + strlen(title) + strlen(artist);
+					notification = (char *)malloc(size);
+					snprintf(notification, size, TEXT_PLAY, title, artist);
+					g_free(title);
+					g_free(artist);
+					mpd_song_free(song);
+					break;
+				case(MPD_STATE_PAUSE):
+					size = strlen(TEXT_PAUSE);
+					notification = (char *)malloc(size);
+					snprintf(notification, size + 1, TEXT_PAUSE);
+					break;
+				case(MPD_STATE_STOP):
+					size = strlen(TEXT_STOP);
+					notification = (char *)malloc(size);
+					snprintf(notification, size + 1, TEXT_STOP);
+					break;
+				default: /*MPD_STATUS_UNKNOWN*/
+					size = strlen(TEXT_UNKNOWN) * 2 + 3;
+					notification = (char *)malloc(size);
+					snprintf(notification, size + 1, "%s - %s", TEXT_UNKNOWN, TEXT_UNKNOWN);
+					break;
 			}
 		}
 
-		printf("%s: %s\n", argv[0], notification);
+		mpd_status_free(status);
+		fprintf(stdout, "%s: %s\n", argv[0], notification);
 
 		notify_notification_update(netlink, "MPD:", notification, "sound");
-		notify_notification_set_category(netlink, "MPD-Notification");
-		notify_notification_set_urgency (netlink, NOTIFY_URGENCY_NORMAL);
+		notify_notification_set_urgency(netlink, NOTIFY_URGENCY_NORMAL);
 
-		while(!notify_notification_show(netlink, &error)) {
-			if (errcount > 1) {
+		while(notify_notification_show(netlink, &error) == FALSE) {
+			if(errcount > 1) {
 				fprintf(stderr, "%s: Can't reconnect to notification daemon. Exiting.\n", argv[0]);
 				exit(EXIT_FAILURE);
 			} else {
@@ -94,10 +123,11 @@ int main(int argc, char **argv) {
 				errcount++;
 
 				g_error_free(error);
+				error = NULL;
 				notify_uninit();
 				usleep(500 * 1000);
 
-				if(!notify_init("mpdnotify")) {
+				if(notify_init("MPD Notify") == FALSE) {
 					fprintf(stderr, "%s: Can't create notify.\n", argv[0]);
 					exit(EXIT_FAILURE);
 				}
@@ -107,6 +137,8 @@ int main(int argc, char **argv) {
 		free(notification);
 		mpd_response_finish(conn);
 	}
+
 	mpd_connection_free(conn);
+	notify_uninit();
 	return EXIT_SUCCESS;
 }
