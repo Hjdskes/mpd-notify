@@ -37,22 +37,38 @@ main(int argc, char **argv) {
 	struct mpd_status *status = NULL;
 	struct mpd_song *song = NULL;
 	const char *temp;
-	char *notification, *title, *artist;
-	int errcount, status_type, size;
+	char *host = NULL, *notification, *title, *artist;
+	int opt, errcount, port = 0, status_type, size;
 	GError *error = NULL;
 
-	fprintf(stdout, "%s: %s v%s (compiled: %s)\n", argv[0], PROGNAME, VERSION, DATE);
+	while((opt = getopt(argc, argv, "c:p:h")) != -1) {
+		switch(opt) {
+			case 'c':
+				host = optarg;
+				break;
+			case 'p':
+				port = atoi(optarg);
+				break;
+			case '?': /*error message is automatically printed*/
+				exit(EXIT_FAILURE);
+			case 'h': /*fallthrough*/
+			default:
+				fprintf(stderr, "%s: %s v%s (compiled: %s)\nUsage: %s [-c host] [-p port] [-h]\n",
+						argv[0], PROGNAME, VERSION, DATE, argv[0]);
+				exit(EXIT_SUCCESS);
+		}
+	}
 
-	conn = mpd_connection_new(NULL, 0, 30000);
+	conn = mpd_connection_new(host, port, 30000);
 	if(mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
 		const char *err = mpd_connection_get_error_message(conn);
-		fprintf(stderr,"%s: %s\n", argv[0], err);
+		fprintf(stderr, "%s: %s\n", argv[0], err);
 		mpd_connection_free(conn);
 		exit(EXIT_FAILURE);
 	}
 
 	if(notify_init("MPD Notify") == FALSE) {
-		fprintf(stderr, "%s: Can't create notify.\n", argv[0]);
+		fprintf(stderr, "%s: can't create notify.\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
@@ -66,7 +82,7 @@ main(int argc, char **argv) {
 
 		status = mpd_recv_status(conn);
 		if(status == FALSE) {
-			fprintf(stderr, "%s: Can't connect to MPD. Exiting.\n", argv[0]);
+			fprintf(stderr, "%s: can't connect to MPD. Exiting.\n", argv[0]);
 			mpd_connection_free(conn);
 			exit(EXIT_FAILURE);
 		} else {
@@ -109,17 +125,16 @@ main(int argc, char **argv) {
 		}
 
 		mpd_status_free(status);
-		fprintf(stdout, "%s: %s\n", argv[0], notification);
 
 		notify_notification_update(netlink, "MPD:", notification, "sound");
 		notify_notification_set_urgency(netlink, NOTIFY_URGENCY_NORMAL);
 
 		while(notify_notification_show(netlink, &error) == FALSE) {
 			if(errcount > 1) {
-				fprintf(stderr, "%s: Can't reconnect to notification daemon. Exiting.\n", argv[0]);
+				fprintf(stderr, "%s: can't reconnect to notification daemon. Exiting.\n", argv[0]);
 				exit(EXIT_FAILURE);
 			} else {
-				g_printerr("%s: Error \"%s\" while trying to show notification. Trying to reconnect.\n", argv[0], error->message);
+				g_printerr("%s: error \"%s\" while trying to show notification. Trying to reconnect.\n", argv[0], error->message);
 				errcount++;
 
 				g_error_free(error);
@@ -128,7 +143,7 @@ main(int argc, char **argv) {
 				usleep(500 * 1000);
 
 				if(notify_init("MPD Notify") == FALSE) {
-					fprintf(stderr, "%s: Can't create notify.\n", argv[0]);
+					fprintf(stderr, "%s: can't create notify.\n", argv[0]);
 					exit(EXIT_FAILURE);
 				}
 			}

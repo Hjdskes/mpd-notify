@@ -3,7 +3,15 @@ MPD Notify
 
 **MPD Notify** notifies you on MPD's state. It will send a notification on song change and on play/pause/stop; it is not a notification daemon by itself.
 
-To be able to use this, you will need to have the following dependencies installed:
+Usage
+-----
+
+MPD Notify supports connecting to remote instances. You can pass the `-c` option to change host and `-p` to change ports:
+
+	-c host	  the server's host name, IP address or Unix socket path.
+	-p port	  the TCP port to connect to, 0 for default port. If "host" is a Unix socket path, this parameter is ignored.
+
+To be able compile and run MPD Notify, you will need to have the following dependencies installed:
 * libnotify
 * libmpdclient
 
