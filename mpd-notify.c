@@ -54,7 +54,7 @@ main(int argc, char **argv) {
 			case 'h': /*fallthrough*/
 			default:
 				fprintf(stderr, "%s: %s v%s (compiled: %s)\nUsage: %s [-c host] [-p port] [-h]\n",
-						argv[0], PROGNAME, VERSION, DATE, argv[0]);
+						argv[0], argv[0], VERSION, DATE, argv[0]);
 				exit(EXIT_SUCCESS);
 		}
 	}

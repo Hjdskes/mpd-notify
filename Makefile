@@ -1,14 +1,24 @@
-PROG     = mpd-notify
-PREFIX  ?= /usr/local
+PROG       = mpd-notify
+CC         = gcc
+PREFIX    ?= /usr/local
+BINPREFIX  = ${PREFIX}/bin
 
-mpd-notify: ${PROG}.c
-	gcc -o ${PROG} ${PROG}.c `pkg-config --cflags --libs libmpdclient libnotify x11` -DPROGNAME="\"mpd-notify\"" -DVERSION="\"1.0\"" -DDATE="\"`date -u`\""
+LIBS       = -lX11 `pkg-config --cflags --libs libmpdclient libnotify` -DVERSION="\"1.0\"" -DDATE="\"`date -u`\""
+CFLAGS    += -Os -Wall
+
+debug: CFLAGS += -O0 -g -pedantic -Wextra
+debug: ${PROG}
+
+${PROG}: ${PROG}.c
+	@${CC} ${CFLAGS} ${LIBS} ${PROG}.c -o ${PROG}
 
 install:
-	install -Dm755 ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
+	install -Dm755 ${PROG} ${DESTDIR}${BINPREFIX}/
 
 uninstall:
-	rm -f ${DESTDIR}${PREFIX}/bin/${PROG}
+	rm -f ${BINPREFIX}/${PROG}
 
 clean:
-	rm -f mpd-notify
+	rm -f ${PROG}
+
+.PHONY: debug clean install uninstall
