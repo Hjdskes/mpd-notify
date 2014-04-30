@@ -99,10 +99,6 @@ main(int argc, char **argv) {
 					if(!temp)
 						temp = TEXT_UNKNOWN;
 					artist = g_markup_escape_text(temp, -1);
-					if(title == NULL)
-						title = TEXT_UNKNOWN;
-					if(artist == NULL)
-						artist = TEXT_UNKNOWN;
 					size = strlen(TEXT_PLAY) + strlen(title) + strlen(artist);
 					notification = (char *)malloc(size);
 					snprintf(notification, size, TEXT_PLAY, title, artist);
