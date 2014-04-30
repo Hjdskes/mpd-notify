@@ -92,8 +92,12 @@ main(int argc, char **argv) {
 					mpd_response_next(conn);
 					song = mpd_recv_song(conn);
 					temp = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
+					if(!temp)
+						temp = TEXT_UNKNOWN;
 					title = g_markup_escape_text(temp, -1);
 					temp = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
+					if(!temp)
+						temp = TEXT_UNKNOWN;
 					artist = g_markup_escape_text(temp, -1);
 					if(title == NULL)
 						title = TEXT_UNKNOWN;
