@@ -100,25 +100,25 @@ main(int argc, char **argv) {
 						temp = TEXT_UNKNOWN;
 					artist = g_markup_escape_text(temp, -1);
 					size = strlen(TEXT_PLAY) + strlen(title) + strlen(artist);
-					notification = (char *)malloc(size);
+					notification = (char *)malloc(sizeof(char) * size);
 					snprintf(notification, size, TEXT_PLAY, title, artist);
 					g_free(title);
 					g_free(artist);
 					mpd_song_free(song);
 					break;
 				case(MPD_STATE_PAUSE):
-					size = strlen(TEXT_PAUSE);
-					notification = (char *)malloc(size);
-					snprintf(notification, size + 1, TEXT_PAUSE);
+					size = strlen(TEXT_PAUSE) + 1; /* null-byte */
+					notification = (char *)malloc(sizeof(char) * size);
+					snprintf(notification, size, TEXT_PAUSE);
 					break;
 				case(MPD_STATE_STOP):
-					size = strlen(TEXT_STOP);
-					notification = (char *)malloc(size);
-					snprintf(notification, size + 1, TEXT_STOP);
+					size = strlen(TEXT_STOP) + 1; /* null-byte */
+					notification = (char *)malloc(sizeof(char) * size);
+					snprintf(notification, size, TEXT_STOP);
 					break;
 				default: /*MPD_STATUS_UNKNOWN*/
-					size = strlen(TEXT_UNKNOWN) * 2 + 3;
-					notification = (char *)malloc(size);
+					size = strlen(TEXT_UNKNOWN) * 2 + 3 + 1;
+					notification = (char *)malloc(sizeof(char) * size);
 					snprintf(notification, size + 1, "%s - %s", TEXT_UNKNOWN, TEXT_UNKNOWN);
 					break;
 			}
