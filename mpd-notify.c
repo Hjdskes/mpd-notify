@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <libgen.h>
 #include <stdlib.h>
 #include <string.h>
 #include <mpd/client.h>
@@ -37,7 +38,7 @@ main(int argc, char **argv) {
 	struct mpd_status *status = NULL;
 	struct mpd_song *song = NULL;
 	const char *temp;
-	char *host = NULL, *notification, *title, *artist;
+	char *host = NULL, *notification, *title, *artist, *copy;
 	int opt, errcount, port = 0, status_type, size;
 	GError *error = NULL;
 
@@ -49,9 +50,9 @@ main(int argc, char **argv) {
 			case 'p':
 				port = atoi(optarg);
 				break;
-			case '?': /*error message is automatically printed*/
+			case '?': /* error message is automatically printed */
 				exit(EXIT_FAILURE);
-			case 'h': /*fallthrough*/
+			case 'h': /* fallthrough */
 			default:
 				fprintf(stderr, "%s: %s v%s (compiled: %s)\nUsage: %s [-c host] [-p port] [-h]\n",
 						argv[0], argv[0], VERSION, DATE, argv[0]);
@@ -92,8 +93,12 @@ main(int argc, char **argv) {
 					mpd_response_next(conn);
 					song = mpd_recv_song(conn);
 					temp = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
-					if(!temp)
-						temp = TEXT_UNKNOWN;
+					if(!temp) {
+						temp = mpd_song_get_uri(song);
+						copy = strdup(temp);
+						temp = basename(copy);
+						free(copy);
+					}
 					title = g_markup_escape_text(temp, -1);
 					temp = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
 					if(!temp)
@@ -116,8 +121,8 @@ main(int argc, char **argv) {
 					notification = (char *)malloc(sizeof(char) * size);
 					snprintf(notification, size, TEXT_STOP);
 					break;
-				default: /*MPD_STATUS_UNKNOWN*/
-					size = strlen(TEXT_UNKNOWN) * 2 + 3 + 1;
+				default: /* MPD_STATUS_UNKNOWN */
+					size = strlen(TEXT_UNKNOWN) * 2 + 4;
 					notification = (char *)malloc(sizeof(char) * size);
 					snprintf(notification, size + 1, "%s - %s", TEXT_UNKNOWN, TEXT_UNKNOWN);
 					break;
