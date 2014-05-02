@@ -31,6 +31,18 @@
 #define TEXT_STOP       "Stopped playback"
 #define TEXT_UNKNOWN    "(unknown)"
 
+static void*
+s_malloc(size_t size) {
+	void *pointer;
+
+	pointer = malloc(size);
+	if(pointer == NULL) {
+		fprintf(stderr, "mpd-notify: can't allocate memory.\n");
+		exit(EXIT_FAILURE);
+	}
+	return pointer;
+}
+
 int
 main(int argc, char **argv) {
 	NotifyNotification *netlink = NULL;
@@ -106,7 +118,7 @@ main(int argc, char **argv) {
 						temp = TEXT_UNKNOWN;
 					artist = g_markup_escape_text(temp, -1);
 					size = strlen(TEXT_PLAY) + strlen(title) + strlen(artist);
-					notification = (char *)malloc(size);
+					notification = (char *)s_malloc(size);
 					snprintf(notification, size, TEXT_PLAY, title, artist);
 					g_free(title);
 					g_free(artist);
@@ -114,17 +126,17 @@ main(int argc, char **argv) {
 					break;
 				case(MPD_STATE_PAUSE):
 					size = strlen(TEXT_PAUSE) + 1; /* null-byte */
-					notification = (char *)malloc(size);
+					notification = (char *)s_malloc(size);
 					snprintf(notification, size, TEXT_PAUSE);
 					break;
 				case(MPD_STATE_STOP):
 					size = strlen(TEXT_STOP) + 1; /* null-byte */
-					notification = (char *)malloc(size);
+					notification = (char *)s_malloc(size);
 					snprintf(notification, size, TEXT_STOP);
 					break;
 				default: /* MPD_STATUS_UNKNOWN */
 					size = strlen(TEXT_UNKNOWN) * 2 + 4;
-					notification = (char *)malloc(size);
+					notification = (char *)s_malloc(size);
 					snprintf(notification, size + 1, "%s - %s", TEXT_UNKNOWN, TEXT_UNKNOWN);
 					break;
 			}
