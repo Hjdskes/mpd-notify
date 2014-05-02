@@ -23,6 +23,14 @@ To build and install, just run the following commands:
 	$ make
 	# make clean install
 
+Bugs
+----
+
+For any bug or request [fill an issue][bug] on [GitHub][ghp].
+
+  [bug]: https://github.com/Unia/mpd-notify/issues
+  [ghp]: https://github.com/Unia/mpd-notify
+
 License
 -------
 
