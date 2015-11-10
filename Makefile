@@ -3,7 +3,7 @@ CC        ?= cc
 PREFIX    ?= /usr/local
 BINPREFIX  = ${PREFIX}/bin
 
-SOURCES=$(PROG).c
+SOURCES=$(wildcard src/*.c)
 OBJECTS=$(SOURCES:%.c=%.o)
 
 CPPFLAGS   = -DVERSION="\"1.0\"" -DDATE="\"`date -u`\""
