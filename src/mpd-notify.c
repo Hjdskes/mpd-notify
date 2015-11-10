@@ -1,7 +1,7 @@
 /*
  * mpd-notify.c
  * Copyright (C) 2011-2012 Christian Hesse <mail@eworm.de>
- * Copyright (C) 2013-2014 Jente Hidskes <hjdskes@gmail.com>
+ * Copyright (C) 2013-2015 Jente Hidskes <hjdskes@gmail.com>
  *
  * MPD Notify is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
