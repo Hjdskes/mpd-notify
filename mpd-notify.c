@@ -18,11 +18,14 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <unistd.h>
+#define _POSIX_C_SOURCE 200809L /* strdup */
+
+#include <getopt.h>
 #include <libgen.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <mpd/client.h>
 #include <libnotify/notify.h>
 
@@ -158,7 +161,7 @@ main(int argc, char **argv) {
 				g_error_free(error);
 				error = NULL;
 				notify_uninit();
-				usleep(500 * 1000);
+				sleep(1);
 
 				if(notify_init("MPD Notify") == FALSE) {
 					fprintf(stderr, "%s: can't create notify.\n", argv[0]);
