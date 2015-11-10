@@ -6,7 +6,7 @@ BINPREFIX  = ${PREFIX}/bin
 SOURCES=$(wildcard src/*.c)
 OBJECTS=$(SOURCES:%.c=%.o)
 
-CPPFLAGS   = -DVERSION="\"1.0\"" -DDATE="\"`date -u`\""
+CPPFLAGS   = -DVERSION="\"1.0\""
 LDFLAGS    = `pkg-config --libs libmpdclient libnotify`
 CFLAGS    += -std=c11 -g -Wall -Wextra -Werror -Werror-implicit-function-declaration \
 	     -Werror=format-security -Wformat -Wformat-security -Wundef -Wstrict-prototypes \

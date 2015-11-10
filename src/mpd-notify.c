@@ -1,4 +1,3 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /*
  * mpd-notify.c
  * Copyright (C) 2011-2012 Christian Hesse <mail@eworm.de>
@@ -29,22 +28,12 @@
 #include <mpd/client.h>
 #include <libnotify/notify.h>
 
+#include "util.h"
+
 #define TEXT_PLAY       "<b>%s</b>\n - <i>%s</i>"
 #define TEXT_PAUSE      "Paused playback"
 #define TEXT_STOP       "Stopped playback"
 #define TEXT_UNKNOWN    "(unknown)"
-
-static void*
-s_malloc(size_t size) {
-	void *pointer;
-
-	pointer = malloc(size);
-	if(pointer == NULL) {
-		fprintf(stderr, "mpd-notify: can't allocate memory.\n");
-		exit(EXIT_FAILURE);
-	}
-	return pointer;
-}
 
 int
 main(int argc, char **argv) {
@@ -70,23 +59,20 @@ main(int argc, char **argv) {
 				exit(EXIT_FAILURE);
 			case 'h': /* fallthrough */
 			default:
-				fprintf(stderr, "%s: %s v%s (compiled: %s)\nUsage: %s [-c host] [-p port] [-h]\n",
-						argv[0], argv[0], VERSION, DATE, argv[0]);
-				exit(EXIT_SUCCESS);
+				fprintf (stdout, "Usage: %s [-c host] [-p port] [-h]\n", argv[0]);
+				exit (EXIT_SUCCESS);
 		}
 	}
 
 	conn = mpd_connection_new(host, port, 30000);
 	if(mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
 		const char *err = mpd_connection_get_error_message(conn);
-		fprintf(stderr, "%s: %s\n", argv[0], err);
 		mpd_connection_free(conn);
-		exit(EXIT_FAILURE);
+		die ("Could not connect to MPD: %s. Exiting\n", err);
 	}
 
 	if(notify_init("MPD Notify") == FALSE) {
-		fprintf(stderr, "%s: can't create notify.\n", argv[0]);
-		exit(EXIT_FAILURE);
+		die ("Could not create notification. Exiting\n");
 	}
 
 	netlink = notify_notification_new("MPD Notify", NULL, "sound");
@@ -99,9 +85,8 @@ main(int argc, char **argv) {
 
 		status = mpd_recv_status(conn);
 		if(status == FALSE) {
-			fprintf(stderr, "%s: can't connect to MPD. Exiting.\n", argv[0]);
 			mpd_connection_free(conn);
-			exit(EXIT_FAILURE);
+			die ("Could not connect to MPD. Exiting\n");
 		} else {
 			status_type = mpd_status_get_state(status);
 			switch(status_type) {
@@ -121,7 +106,7 @@ main(int argc, char **argv) {
 						temp = TEXT_UNKNOWN;
 					artist = g_markup_escape_text(temp, -1);
 					size = strlen(TEXT_PLAY) + strlen(title) + strlen(artist);
-					notification = (char *)s_malloc(size);
+					notification = xmalloc (size);
 					snprintf(notification, size, TEXT_PLAY, title, artist);
 					g_free(title);
 					g_free(artist);
@@ -129,17 +114,17 @@ main(int argc, char **argv) {
 					break;
 				case(MPD_STATE_PAUSE):
 					size = strlen(TEXT_PAUSE) + 1; /* null-byte */
-					notification = (char *)s_malloc(size);
+					notification = xmalloc (size);
 					snprintf(notification, size, TEXT_PAUSE);
 					break;
 				case(MPD_STATE_STOP):
 					size = strlen(TEXT_STOP) + 1; /* null-byte */
-					notification = (char *)s_malloc(size);
+					notification = xmalloc (size);
 					snprintf(notification, size, TEXT_STOP);
 					break;
 				default: /* MPD_STATUS_UNKNOWN */
 					size = strlen(TEXT_UNKNOWN) * 2 + 4;
-					notification = (char *)s_malloc(size);
+					notification = xmalloc (size);
 					snprintf(notification, size + 1, "%s - %s", TEXT_UNKNOWN, TEXT_UNKNOWN);
 					break;
 			}
@@ -152,8 +137,7 @@ main(int argc, char **argv) {
 
 		while(notify_notification_show(netlink, &error) == FALSE) {
 			if(errcount > 1) {
-				fprintf(stderr, "%s: can't reconnect to notification daemon. Exiting.\n", argv[0]);
-				exit(EXIT_FAILURE);
+				die ("Could not reconnect to the notification daemon. Exiting\n");
 			} else {
 				g_printerr("%s: error \"%s\" while trying to show notification. Trying to reconnect.\n", argv[0], error->message);
 				errcount++;
@@ -164,8 +148,7 @@ main(int argc, char **argv) {
 				sleep(1);
 
 				if(notify_init("MPD Notify") == FALSE) {
-					fprintf(stderr, "%s: can't create notify.\n", argv[0]);
-					exit(EXIT_FAILURE);
+					die ("Could not create notification. Exiting\n");
 				}
 			}
 		}
