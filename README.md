@@ -1,15 +1,19 @@
 MPD Notify
 ==========
 
-**MPD Notify** notifies you on MPD's state. It will send a notification on song change and on play/pause/stop; it is not a notification daemon by itself.
+**MPD Notify** sends you a notification whenever MPD's state changes (play/pause/stop) as well as
+when the currently playing song changes. For this to work, it requires a running notification
+daemon: it is not a notification daemon by itself.
 
 Usage
 -----
 
-MPD Notify supports connecting to remote instances. You can pass the `-c` option to change host and `-p` to change ports:
+MPD Notify supports connecting to remote instances. You can pass the `-c` flag to change the host
+and the `-p` flag to change the port:
 
 	-c host	  the server's host name, IP address or Unix socket path.
-	-p port	  the TCP port to connect to, 0 for default port. If "host" is a Unix socket path, this parameter is ignored.
+	-p port	  the TCP port to connect to, or 0 for the default port. If "host" is a Unix socket
+    		  path, this parameter is ignored.
 
 Installation
 ------------
@@ -26,15 +30,14 @@ To build and install, just run the following commands:
 Bugs
 ----
 
-For any bug or request [fill an issue][bug] on [GitHub][ghp].
-
-  [bug]: https://github.com/Unia/mpd-notify/issues
-  [ghp]: https://github.com/Unia/mpd-notify
+For any bug or request [fill an issue](https://github.com/Unia/mpd-notify/issues) on [GitHub][github].
 
 License
 -------
 
-I have forked the original project by Christian Hesse (mail@eworm.de) and as such, all credit should still be given to him. 
-I asked for his permission to upload this and it has been granted.
+Please see [LICENSE](https://github.com/Unia/mpd-notify/blob/master/LICENSE) on [GitHub][github].
 
-This project is licensed under the GNU General Public License and should be treated as such. See `COPYING` for more information.
+MPD Notify is a fork of [MPD Notification](https://github.com/eworm-de/mpd-notification) by
+Christian Hesse.
+
+  [github]: https://github.com/Unia/mpd-notify
