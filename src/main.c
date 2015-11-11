@@ -17,44 +17,73 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _POSIX_C_SOURCE 200809L /* strndup */
+
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "mpd.h"
 #include "notify.h"
 #include "util.h"
 
+static void
+version (void)
+{
+	fprintf (stdout, "mpd-notify version "VERSION"\n");
+	exit (EXIT_SUCCESS);
+}
+
+static void
+usage (void)
+{
+	fprintf (stdout, "Usage: mpd-notify [-c host] [-p port] [-h] [-v]\n"
+			"\t-c host   the server's host name, IP address or Unix socket path\n"
+			"\t-p port   the TCP port to connect to, or 0 for the default port. If\n"
+			"\t          \"host\" is a Unix socket path, this parameter is ignored\n"
+			"\t-h        display this help message and exit\n"
+			"\t-v        display version number and exit\n");
+	exit (EXIT_SUCCESS);
+}
+
 int
 main (int argc, char **argv)
 {
+	bool success;
 	const char *err;
 	char *host = NULL;
 	unsigned int port = 0;
 	int opt;
 
-	while((opt = getopt(argc, argv, "c:p:h")) != -1) {
-		switch(opt) {
-			case 'c':
-				host = optarg;
-				break;
-			case 'p':
-				port = atoi(optarg);
-				break;
-			case '?': /* error message is automatically printed */
-				exit(EXIT_FAILURE);
-			case 'h': /* fallthrough */
-			default:
-				fprintf (stdout, "Usage: %s [-c host] [-p port] [-h]\n", argv[0]);
-				exit (EXIT_SUCCESS);
+	while ((opt = getopt (argc, argv, "c:p:hv")) != -1) {
+		switch (opt) {
+		case 'c':
+			host = strndup (optarg, strlen (optarg));
+			break;
+		case 'p':
+			/* FIXME: make safer. */
+			port = atoi (optarg);
+			break;
+		case '?':
+			/* Error message is automatically printed. */
+			exit (EXIT_FAILURE);
+		case 'v':
+			version ();
+		case 'h': /* Fallthrough. */
+		default:
+			usage ();
 		}
 	}
 
-	if (!init_mpd (host, port, &err)) {
+	success = init_mpd (host, port, &err);
+	free (host);
+	if (!success) {
 		die ("Could not connect to MPD: %s. Exiting\n", err);
 	}
 
-	if (!init_notify ()) {
+	success = init_notify ();
+	if (!success) {
 		die ("Could not initiate libnotify. Exiting\n");
 	}
 
