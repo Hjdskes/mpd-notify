@@ -26,7 +26,8 @@
 #include "notify.h"
 #include "util.h"
 
-#define TEXT_PLAY       "<b>%s</b>\n - <i>%s</i>"
+#define TEXT_TITLE      "%s"
+#define TEXT_ARTIST     "%s - %s"
 #define TEXT_PAUSE      "Paused playback"
 #define TEXT_STOP       "Stopped playback"
 #define TEXT_UNKNOWN    "(unknown)"
@@ -63,9 +64,22 @@ get_title (struct mpd_song *song, char **title)
 }
 
 static void
+get_album (struct mpd_song *song, char **album)
+{
+	const char *tmp;
+
+	tmp = mpd_song_get_tag (song, MPD_TAG_ALBUM, 0);
+	if (tmp) {
+		*album = g_markup_escape_text (tmp, -1);
+		return;
+	}
+	*album = TEXT_UNKNOWN;
+}
+
+static void
 real_mainloop (struct mpd_connection *conn)
 {
-	char *notification, *title, *artist;
+	char *summary, *body = NULL, *title, *artist, *album;
 	struct mpd_song *song = NULL;
 	struct mpd_status *status = NULL;
 	enum mpd_state state;
@@ -88,27 +102,31 @@ real_mainloop (struct mpd_connection *conn)
 	case (MPD_STATE_PLAY):
 		mpd_response_next (conn);
 		song = mpd_recv_song (conn);
-		get_artist (song, &artist);
 		get_title (song, &title);
-		notification = notification_new (TEXT_PLAY, artist, title, NULL);
-		g_free (artist);
+		get_artist (song, &artist);
+		get_album (song, &album);
+		summary = string_new (TEXT_TITLE, title, NULL);
+		body = string_new (TEXT_ARTIST, artist, album, NULL);
 		g_free (title);
+		g_free (artist);
+		g_free (album);
 		mpd_song_free (song);
 		break;
 	case (MPD_STATE_PAUSE):
-		notification = notification_new (TEXT_PAUSE, NULL);
+		summary = string_new (TEXT_PAUSE, NULL);
 		break;
 	case (MPD_STATE_STOP):
-		notification = notification_new (TEXT_STOP, NULL);
+		summary = string_new (TEXT_STOP, NULL);
 		break;
 	default: /* MPD_STATUS_UNKNOWN */
-		notification = notification_new (TEXT_PLAY, TEXT_UNKNOWN, TEXT_UNKNOWN, NULL);
+		summary = string_new (TEXT_ARTIST, TEXT_UNKNOWN, TEXT_UNKNOWN, NULL);
 		break;
 	}
 	mpd_response_finish (conn);
 
-	send_notification (notification);
-	free (notification);
+	send_notification (summary, body);
+	free (summary);
+	free (body);
 }
 
 void

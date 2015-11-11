@@ -19,6 +19,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "util.h"
 
@@ -32,6 +33,31 @@ xmalloc (size_t size)
 		die ("Could not allocate %lu bytes. Exiting\n", size);
 	}
 	return p;
+}
+
+char *
+string_new (const char *text, ...)
+{
+	va_list args;
+	char *arg;
+	size_t size;
+	char *string;
+
+	size = strlen (text) + 1;
+	va_start (args, text);
+	arg = va_arg (args, char *);
+	while (arg) {
+		size += strlen (arg);
+		arg = va_arg (args, char *);
+	}
+	va_end (args);
+
+	string = xmalloc (size);
+	va_start (args, text);
+	vsnprintf (string, size, text, args);
+	va_end (args);
+
+	return string;
 }
 
 void

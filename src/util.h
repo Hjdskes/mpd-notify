@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <stdarg.h>
+
 void *xmalloc (size_t size);
+char *string_new (const char *text, ...);
 void die (const char *msg, ...);
 

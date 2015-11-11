@@ -16,52 +16,25 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdarg.h>
 #include <stdbool.h>
-#include <string.h>
 #include <libnotify/notify.h>
 
 #include "notify.h"
 #include "util.h"
 
 void
-send_notification (const char *body)
+send_notification (const char *summary, const char *body)
 {
 	NotifyNotification *notification;
 	GError *error = NULL;
 
-	notification = notify_notification_new ("MPD:", body, "sound");
+	notification = notify_notification_new (summary, body, "sound");
 	notify_notification_set_urgency (notification, NOTIFY_URGENCY_NORMAL);
 
 	if (!notify_notification_show (notification, &error)) {
 		g_printerr ("Could not show notification: \"%s\"\n", error->message);
 		g_clear_error (&error);
 	}
-}
-
-char *
-notification_new (const char *text, ...)
-{
-	va_list args;
-	char *arg;
-	size_t size;
-	char *notification;
-
-	size = strlen (text) + 1;
-	va_start (args, text);
-	arg = va_arg (args, char *);
-	while (arg) {
-		size += strlen (arg);
-		arg = va_arg (args, char *);
-	}
-	va_end (args);
-
-	notification = xmalloc (size);
-	va_start (args, text);
-	vsnprintf (notification, size, text, args);
-	va_end (args);
-
-	return notification;
 }
 
 bool

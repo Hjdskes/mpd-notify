@@ -18,11 +18,9 @@
 
 #pragma once
 
-#include <stdarg.h>
 #include <stdbool.h>
 
-void send_notification (const char *body);
-char *notification_new (const char *text, ...);
+void send_notification (const char *summary, const char *body);
 bool init_notify (void);
 void uninit_notify (void);
 
