@@ -1,5 +1,5 @@
 /**
- * utils.c
+ * util.c
  * Copyright (C) 2015 Jente Hidskes <hjdskes@gmail.com>
  *
  * MPD Notify is free software: you can redistribute it and/or modify it
