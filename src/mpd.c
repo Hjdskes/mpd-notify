@@ -19,6 +19,7 @@
 #include <libgen.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <glib.h>
 #include <mpd/client.h>
 
@@ -35,45 +36,43 @@
 static struct mpd_connection *conn;
 
 static void
-get_artist (struct mpd_song *song, char **artist)
+get_tag (struct mpd_song *song, enum mpd_tag_type tag, char **out)
 {
 	const char *tmp;
 
-	tmp = mpd_song_get_tag (song, MPD_TAG_ARTIST, 0);
+	tmp = mpd_song_get_tag (song, tag, 0);
 	if (tmp) {
-		*artist = g_markup_escape_text (tmp, -1);
+		*out = g_markup_escape_text (tmp, -1);
 		return;
 	}
-	*artist = TEXT_UNKNOWN;
+	*out = TEXT_UNKNOWN;
+}
+
+static void
+get_artist (struct mpd_song *song, char **artist)
+{
+	get_tag (song, MPD_TAG_ARTIST, artist);
 }
 
 static void
 get_title (struct mpd_song *song, char **title)
 {
-	const char *tmp;
+	get_tag (song, MPD_TAG_TITLE, title);
 
-	tmp = mpd_song_get_tag (song, MPD_TAG_TITLE, 0);
-	if (tmp) {
-		*title = g_markup_escape_text (tmp, -1);
-		return;
+	if (strncmp (*title, TEXT_UNKNOWN, strlen (TEXT_UNKNOWN)) == 0) {
+		gchar *base;
+
+		free (*title);
+		base = g_path_get_basename (mpd_song_get_uri (song));
+		*title = g_markup_escape_text (base, -1);
+		g_free (base);
 	}
-
-	gchar *base = g_path_get_basename (mpd_song_get_uri (song));
-	*title = g_markup_escape_text (base, -1);
-	g_free (base);
 }
 
 static void
 get_album (struct mpd_song *song, char **album)
 {
-	const char *tmp;
-
-	tmp = mpd_song_get_tag (song, MPD_TAG_ALBUM, 0);
-	if (tmp) {
-		*album = g_markup_escape_text (tmp, -1);
-		return;
-	}
-	*album = TEXT_UNKNOWN;
+	get_tag (song, MPD_TAG_ALBUM, album);
 }
 
 static void
