@@ -137,11 +137,10 @@ mpd_mainloop ()
 }
 
 bool
-init_mpd (const char *host, unsigned int port, const char **err)
+init_mpd (const char *host, unsigned int port)
 {
 	conn = mpd_connection_new (host, port, 30000);
 	if (mpd_connection_get_error (conn) != MPD_ERROR_SUCCESS) {
-		*err = mpd_connection_get_error_message (conn);
 		mpd_connection_free (conn);
 		return false;
 	}

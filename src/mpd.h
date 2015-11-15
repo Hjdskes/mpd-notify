@@ -21,6 +21,6 @@
 #include <stdbool.h>
 
 void mpd_mainloop (void);
-bool init_mpd (const char *host, unsigned int port, const char **err);
+bool init_mpd (const char *host, unsigned int port);
 void uninit_mpd (void);
 

@@ -51,7 +51,6 @@ int
 main (int argc, char **argv)
 {
 	bool success;
-	const char *err;
 	char *host = NULL;
 	unsigned int port = 0;
 	int opt;
@@ -76,10 +75,10 @@ main (int argc, char **argv)
 		}
 	}
 
-	success = init_mpd (host, port, &err);
+	success = init_mpd (host, port);
 	free (host);
 	if (!success) {
-		die ("Could not connect to MPD: %s. Exiting\n", err);
+		die ("Could not connect to MPD. Exiting\n");
 	}
 
 	success = init_notify ();
