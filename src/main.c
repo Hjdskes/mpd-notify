@@ -47,25 +47,23 @@ usage (void)
 	exit (EXIT_SUCCESS);
 }
 
-int
-main (int argc, char **argv)
+static void
+parse_options (int argc, char **argv, char **host, unsigned int *port)
 {
-	bool success;
-	char *host = NULL;
-	unsigned int port = 0;
 	int opt;
 
 	while ((opt = getopt (argc, argv, "c:p:hv")) != -1) {
 		switch (opt) {
 		case 'c':
-			host = strndup (optarg, strlen (optarg));
+			*host = strndup (optarg, strlen (optarg));
 			break;
 		case 'p':
 			{
 				char *end;
 
-				port = strtol (optarg, &end, 10);
+				*port = strtol (optarg, &end, 10);
 				if (*end) {
+					free (*host);
 					die ("\"port\" requires a valid integer argument, "
 							"but got \"%s\" instead\n", optarg);
 				}
@@ -81,6 +79,16 @@ main (int argc, char **argv)
 			usage ();
 		}
 	}
+}
+
+int
+main (int argc, char **argv)
+{
+	bool success;
+	char *host = NULL;
+	unsigned int port = 0;
+
+	parse_options (argc, argv, &host, &port);
 
 	success = init_mpd (host, port);
 	free (host);
