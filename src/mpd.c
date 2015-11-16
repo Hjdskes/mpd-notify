@@ -60,12 +60,12 @@ get_title (struct mpd_song *song, char **title)
 	get_tag (song, MPD_TAG_TITLE, title);
 
 	if (strncmp (*title, TEXT_UNKNOWN, strlen (TEXT_UNKNOWN)) == 0) {
-		gchar *base;
+		char *base;
 
 		free (*title);
 		base = g_path_get_basename (mpd_song_get_uri (song));
 		*title = g_markup_escape_text (base, -1);
-		g_free (base);
+		free (base);
 	}
 }
 
@@ -105,9 +105,9 @@ real_mainloop (struct mpd_connection *conn)
 		get_album (song, &album);
 		summary = string_new (TEXT_TITLE, title, NULL);
 		body = string_new (TEXT_ARTIST, artist, album, NULL);
-		g_free (title);
-		g_free (artist);
-		g_free (album);
+		free (title);
+		free (artist);
+		free (album);
 		mpd_song_free (song);
 		break;
 	case (MPD_STATE_PAUSE):

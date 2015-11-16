@@ -32,7 +32,7 @@ send_notification (const char *summary, const char *body)
 	notify_notification_set_urgency (notification, NOTIFY_URGENCY_NORMAL);
 
 	if (!notify_notification_show (notification, &error)) {
-		g_printerr ("Could not show notification: \"%s\"\n", error->message);
+		warn ("Could not show notification: \"%s\"\n", error->message);
 		g_clear_error (&error);
 	}
 }
