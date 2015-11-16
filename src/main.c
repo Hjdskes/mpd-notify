@@ -61,8 +61,15 @@ main (int argc, char **argv)
 			host = strndup (optarg, strlen (optarg));
 			break;
 		case 'p':
-			/* FIXME: make safer. */
-			port = atoi (optarg);
+			{
+				char *end;
+
+				port = strtol (optarg, &end, 10);
+				if (*end) {
+					die ("\"port\" requires a valid integer argument, "
+							"but got \"%s\" instead\n", optarg);
+				}
+			}
 			break;
 		case '?':
 			/* Error message is automatically printed. */
