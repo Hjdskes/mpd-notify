@@ -22,5 +22,6 @@
 
 void *xmalloc (size_t size);
 char *string_new (const char *text, ...);
+void warn (const char *msg, ...);
 void die (const char *msg, ...);
 

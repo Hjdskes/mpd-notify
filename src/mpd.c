@@ -90,9 +90,8 @@ real_mainloop (struct mpd_connection *conn)
 
 	status = mpd_recv_status (conn);
 	if (!status) {
-		/* FIXME: read into error code and try to fix it? */
-		mpd_connection_free (conn);
-		die ("Could not connect to MPD. Exiting\n");
+		warn ("Could not receive status from MPD. Notification won't be sent\n");
+		return;
 	}
 
 	state = mpd_status_get_state (status);

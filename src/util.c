@@ -61,14 +61,19 @@ string_new (const char *text, ...)
 }
 
 void
-die (const char *msg, ...)
+warn (const char *msg, ...)
 {
 	va_list ap;
 
 	va_start (ap, msg);
 	vfprintf (stderr, msg, ap);
 	va_end (ap);
+}
 
+void
+die (const char *msg, ...)
+{
+	warn (msg);
 	exit (EXIT_FAILURE);
 }
 
